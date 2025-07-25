@@ -15,9 +15,9 @@ const Header = () => {
                     </a>
                     <div className="md:hidden">
                         <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="relative w-6 h-6">
-                            <span className={`absolute h-0.5 w-6 bg-slate-800 dark:bg-white transform transition duration-300 ease-in-out ${isMenuOpen ? 'rotate-45' : '-translate-y-2'}`}></span>
-                            <span className={`absolute h-0.5 w-6 bg-slate-800 dark:bg-white transform transition duration-300 ease-in-out ${isMenuOpen ? 'opacity-0' : ''}`}></span>
-                            <span className={`absolute h-0.5 w-6 bg-slate-800 dark:bg-white transform transition duration-300 ease-in-out ${isMenuOpen ? '-rotate-45' : 'translate-y-2'}`}></span>
+                            <span className={`absolute h-0.5 w-6 bg-gray-500 transform transition duration-300 ease-in-out ${isMenuOpen ? 'rotate-45' : '-translate-y-2'}`}></span>
+                            <span className={`absolute h-0.5 w-6 bg-gray-500 transform transition duration-300 ease-in-out ${isMenuOpen ? 'opacity-0' : ''}`}></span>
+                            <span className={`absolute h-0.5 w-6 bg-gray-500 transform transition duration-300 ease-in-out ${isMenuOpen ? '-rotate-45' : 'translate-y-2'}`}></span>
                         </button>
                     </div>
                     <nav className="hidden md:flex space-x-8 font-medium">
