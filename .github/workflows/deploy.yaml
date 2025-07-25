@@ -102,4 +102,4 @@ jobs:
       # 3. Deploys the static files to the S3 bucket, using the variable for the bucket name
       - name: Deploy site to S3 bucket
         run: |
-          aws s3 sync ./out s3://${{ vars.S3_BUCKET }} --delete
+          aws s3 sync ./out s3://my-nextawss --delete
