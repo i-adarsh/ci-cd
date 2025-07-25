@@ -1,5 +1,5 @@
 # Workflow name
-name: Deploy Next.js Site to GitHub Pages
+name: Build and Deploy Next.js Site to AWS S3
 
 # Controls when the workflow will run
 on:
@@ -12,24 +12,9 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build-and-deploy"
-  build-and-deploy:
-    # The type of runner that the job will run on
+  # This job builds the Next.js application and uploads the artifact
+  build:
     runs-on: ubuntu-latest
-
-    # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-
-    # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-    # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-    concurrency:
-      group: "pages"
-      cancel-in-progress: false
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # 1. Checks out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout repository
@@ -40,7 +25,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20" # Use a recent LTS version of Node.js
-          cache: 'npm' # Enable caching for npm dependencies
+          cache: 'npm'       # Enable caching for npm dependencies
 
       # 3. Installs project dependencies
       - name: Install dependencies
@@ -50,20 +35,58 @@ jobs:
       - name: Build Next.js site
         run: npm run build # This will generate the static site in the 'out' directory
 
-      # 5. Configures GitHub Pages
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v5
-        # No extra configuration needed if using the root of the repository
-
-      # 6. Uploads the build artifact from the 'out' directory
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      # 5. Uploads the build output as an artifact
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
-          # Path to the directory containing the static files
-          path: './out'
+          name: nextjs-site # Name of the artifact
+          path: ./out      # Path to the directory to upload
 
-      # 7. Deploys the artifact to GitHub Pages
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-        # This action will automatically deploy the uploaded artifact
+  # This job deploys the artifact to the S3 bucket
+  deploy:
+    # This job requires the 'build' job to complete successfully
+    needs: build
+    runs-on: ubuntu-latest
+    
+    # Use the 'aws' environment you created in repository settings
+    environment: aws
+    
+    # Sets permissions for configuring AWS credentials
+    permissions:
+      id-token: write # Required for federated identity (if used)
+      contents: read  # Required to checkout the repository
+
+    steps:
+      # 1. Downloads the build artifact created in the 'build' job
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-site # Must match the artifact name from the 'build' job
+          path: ./out      # Directory to download the artifact to
+
+      # 2. Configures AWS credentials using the secrets from your 'aws' environment
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
+          # Use the AWS_REGION variable from the 'aws' environment
+          aws-region: ${{ vars.AWS_REGION }}
+
+      # 3. Deploys the static files to the S3 bucket
+      - name: Deploy site to S3 bucket
+        run: |
+          # Use the S3_BUCKET variable from the 'aws' environment
+          aws s3 sync ./out s3://${{ vars.S3_BUCKET }} --delete
+          
+      # 4. (Optional) Invalidate CloudFront distribution
+      # If you are using AWS CloudFront as a CDN, uncomment the following lines
+      # to automatically clear the cache after a new deployment.
+      # - name: Invalidate CloudFront cache
+      #   run: |
+      #     # IMPORTANT: Replace 'YOUR_CLOUDFRONT_DISTRIBUTION_ID' with your distribution ID
+      #     aws cloudfront create-invalidation --distribution-id YOUR_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+
+```
+
+
