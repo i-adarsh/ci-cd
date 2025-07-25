@@ -87,6 +87,4 @@ jobs:
       #     # IMPORTANT: Replace 'YOUR_CLOUDFRONT_DISTRIBUTION_ID' with your distribution ID
       #     aws cloudfront create-invalidation --distribution-id YOUR_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
 
-```
-
 
