@@ -95,11 +95,10 @@ jobs:
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
       
-      - name: Setup GCP CLI
+      - name: Setup Google Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
         with:
-          project_id: ${{ env.GCP_PROJECT_ID }}
-          install_components: 'gsutil'
+          project_id: ${{ vars.GCP_PROJECT_ID }}
 
       # 3. Deploys the static files to the GCS bucket
       # The `gsutil` command-line tool is automatically available after authentication.
