@@ -94,6 +94,12 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
+      
+      - name: Setup GCP CLI
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          install_components: 'gsutil'
 
       # 3. Deploys the static files to the GCS bucket
       # The `gsutil` command-line tool is automatically available after authentication.
